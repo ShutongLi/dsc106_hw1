@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>D3 Line plot</title>
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        text {
+            font-family: arial;
+            font-size: 12px;
+        }
+
+
+        path.line {
+            fill: none;
+            stroke: red;
+            stroke-width: 3px;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: slategray;
+            shape-rendering: crispEdges;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+    //import * as d3 from "./d3/d3";
+
+    var parseDate = d3.timeParse("%Y");
+
+    var margin = {left: 50, right: 20, top: 20, bottom: 50 };
+
+    var width = 960 - margin.left - margin.right;
+    var height = 500 - margin.top - margin.bottom;
+
+
+    var max = 0;
+
+    var xNudge = 50;
+    var yNudge = 20;
+
+    var minDate = new Date();
+    var maxDate = new Date();
+    // Your beautiful D3 code will go here
+    d3.csv('d3/fuck_106.csv')
+        .row(function(d) {return {year: parseDate(+d.year), fulltime_men_applied: +(d["fulltime_men_applied"].replace(",", ""))};})
+        .get(function(error, rows) {
+            max = d3.max(rows, function (d) {
+                return d.fulltime_men_applied;
+            });
+            minDate = d3.min(rows, function (d) {
+                return d.year;
+            });
+            maxDate = d3.max(rows, function (d) {
+                return d.year;
+            });
+            var y = d3.scaleLinear()
+                .domain([0,max])
+                .range([height,0]);
+            var x = d3.scaleTime()
+                .domain([minDate,maxDate])
+                .range([0,width]);
+            var yAxis = d3.axisLeft(y);
+            var xAxis = d3.axisBottom(x);
+
+            var line = d3.line()
+                .x(function(d){ return x(d.year); })
+                .y(function(d){ return y(d.fulltime_men_applied); })
+                .curve(d3.curveCardinal);
+            var svg = d3.select("body").append("svg").attr("id","svg").attr("height","100%").attr("width","100%");
+            var chartGroup = svg.append("g").attr("class","chartGroup").attr("transform","translate("+xNudge+","+yNudge+")");
+            chartGroup.append("path")
+                .attr("class","line")
+                .attr("d",function(d){ return line(rows); })
+            chartGroup.append("g")
+                .attr("class","axis x")
+                .attr("transform","translate(0,"+height+")")
+                .call(xAxis);
+            chartGroup.append("g")
+                .attr("class","axis y")
+                .call(yAxis);
+
+        });
+
+    // .then(
+        //     function(data){
+        //         data.forEach(function(d) {
+        //         d.year = +d.year;
+        //         d["fulltime_men_applied"] = +(d["fulltime_men_applied"].replace(",", ""));
+        //         d["fulltime_women_applied"] = +(d["fulltime_women_applied"].replace(",", ""));
+        //     });
+        //     console.log(data[0]);
+        // });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    .arc text {
+        font: 10px sans-serif;
+        text-anchor: middle;
+    }
+
+    .arc path {
+        stroke: #fff;
+    }
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height"),
+        radius = Math.min(width, height) / 2,
+        g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    var color = d3.scaleOrdinal(["#70cea0", "#6111ce", "#2fd360", "#dffd23", "#b72c48", "#84ea73", "#6ebf8f", "#53b75c"
+        , "#97aaf7", "#9f4e92", "#1c7f45", "#39c281", "#3fad3c", "#906351"]);
+    var pie = d3.pie()
+        .sort(null)
+        .value(function(d) { return d.fulltime_men_applied; });
+    var path = d3.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(0);
+    var label = d3.arc()
+        .outerRadius(radius - 40)
+        .innerRadius(radius - 40);
+    d3.csv("d3/fuck_106.csv", function(d) {
+        d.fulltime_men_applied = +(d.fulltime_men_applied.replace(",", ""));
+        return d;
+    }, function(error, data) {
+        if (error) throw error;
+        var arc = g.selectAll(".arc")
+            .data(pie(data))
+            .enter().append("g")
+            .attr("class", "arc");
+        arc.append("path")
+            .attr("d", path)
+            .attr("fill", function(d) { return color(d.data.year); });
+        arc.append("text")
+            .attr("transform", function(d) { return "translate(" + label.centroid(d) + ")"; })
+            .attr("dy", "0.35em")
+            .text(function(d) { return d.data.year; });
+        }
+    )
+</script>
